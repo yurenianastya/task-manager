@@ -1,0 +1,19 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+.mat-toolbar {
+  display: flex;
+  align-items: center;
+  background-color: #959dc5;
+  gap: 1rem;
+}
+
+.user-select {
+  margin-top: 1.25rem;
+  width: 8rem;
+}
+
+.add-task {
+  align-self: flex-end;
+}

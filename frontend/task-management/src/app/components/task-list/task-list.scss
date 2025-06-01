@@ -1,0 +1,74 @@
+.container {
+  display: flex;
+  gap: 16px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 8px;
+}
+
+.column {
+  flex: 1 1 300px;
+  min-width: 280px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.mat-mdc-card {
+  padding: 2rem;
+  margin: 2rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+  .column {
+    flex: 1 1 100%;
+    min-width: auto;
+    margin-bottom: 16px;
+  }
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+mat-icon.low {
+  color: green;
+}
+
+mat-icon.medium {
+  color: orange;
+}
+
+mat-icon.high {
+  color: red;
+}
+
+.delete-icon {
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.54);
+  transition: color 0.3s ease;
+}
+
+.delete-icon:hover {
+  color: #f44336;
+}
+
+.edit-icon {
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.54);
+  transition: color 0.3s ease;
+}
+
+.edit-icon:hover {
+  color: #36d8f4;
+}

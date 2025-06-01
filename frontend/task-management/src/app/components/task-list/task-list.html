@@ -1,0 +1,17 @@
+<div class="container">
+  <div class="column" *ngFor="let status of statuses">
+    <h3>{{ status }}</h3>
+    <div>
+      <mat-card class="card" *ngFor="let task of filteredTasks(status)" class="task-card">
+        <div class="task-header">
+          <mat-icon [ngClass]="task.priority">brightness_1</mat-icon>
+          <mat-card-title>{{ task.title }}</mat-card-title>
+          <span class="spacer"></span>
+          <mat-icon class="edit-icon" (click)="openEditDialog(task)">settings</mat-icon>
+          <mat-icon class="delete-icon" (click)="deleteTask(task.id)">delete</mat-icon>
+        </div>
+        <mat-card-content>{{ task.description }}</mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

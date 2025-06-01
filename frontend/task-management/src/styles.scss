@@ -1,0 +1,21 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+:root {
+  --md-sys-color-primary: #2A4759;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-surface: #a6beeb;
+  --md-sys-color-on-surface: #1c1c1c;
+  --md-sys-color-background: #ffffff;
+  --md-sys-color-on-background: #1c1c1c;
+  --md-sys-typescale-body-large-font: 'Inter', sans-serif;
+  --md-sys-typescale-title-medium-font: 'Inter', sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+}

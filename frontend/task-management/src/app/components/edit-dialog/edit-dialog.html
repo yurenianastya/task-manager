@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>{{ data.id ? 'EDIT' : 'CREATE' }} TASK</h2>
+<form [formGroup]="form" (ngSubmit)="onSave()">
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Title</mat-label>
+    <input matInput formControlName="title" />
+    <mat-error *ngIf="form.controls['title'].invalid && form.controls['title'].touched">
+      Title is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description"></textarea>
+    <mat-error *ngIf="form.controls['description'].invalid && form.controls['description'].touched">
+      Description is required
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Status</mat-label>
+    <mat-select formControlName="status">
+      <mat-option value="todo">To Do</mat-option>
+      <mat-option value="in_progress">In Progress</mat-option>
+      <mat-option value="done">Done</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Priority</mat-label>
+    <mat-select formControlName="priority">
+      <mat-option value="low">Low</mat-option>
+      <mat-option value="medium">Medium</mat-option>
+      <mat-option value="high">High</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <input type="hidden" formControlName="user_id" />
+
+  <div class="actions">
+    <button mat-button type="button" (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+      {{ data.id ? 'Save' : 'Create' }}
+    </button>
+  </div>
+</form>

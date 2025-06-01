@@ -1,0 +1,13 @@
+<mat-toolbar>
+  <span>TaskApp</span>
+  <span class="spacer"></span>
+  <button mat-icon-button matTooltip="Add Task" aria-label="Add Task" (click)="openEditDialog()">
+    <mat-icon>add</mat-icon>
+  </button>
+  <mat-form-field appearance="fill" class="user-select">
+    <mat-label>User</mat-label>
+    <mat-select [(ngModel)]="selectedUser" name="user" (ngModelChange)="userChanged.emit(selectedUser)">
+      <mat-option *ngFor="let user of users" [value]="user">{{ user.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</mat-toolbar>
