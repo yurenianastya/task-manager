@@ -1,6 +1,23 @@
 import asyncio
 import random
-from database import engine, Base, async_session, User, Task, StatusEnum, PriorityEnum
+
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+from app.database.schemas import Task, User, Base, StatusEnum, PriorityEnum
+
+DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+
+engine = create_async_engine(DATABASE_URL, echo=True)
+async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+
+@event.listens_for(engine.sync_engine, "connect")
+def enforce_foreign_keys(dbapi_connection, connection_record):
+    dbapi_connection.execute("PRAGMA foreign_keys=ON")
+
+async def get_session() -> AsyncSession:
+    async with async_session() as session:
+        yield session
 
 async def seed_db(session):
     user_names = ["Alice", "Bob", "Charlie", "Diana"]

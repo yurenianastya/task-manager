@@ -28,7 +28,7 @@ class Task(BaseModel):
     user_id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class CreateUser(BaseModel):
     name: str
@@ -39,4 +39,4 @@ class User(BaseModel):
     tasks: List[Task]
 
     class Config:
-        from_attributes = True
+        orm_mode = True

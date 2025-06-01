@@ -1,44 +1,17 @@
-import asyncio
-from typing import List, Dict
-from database import Task as TaskDB, User as UserDB, get_session
-from models import Task as TaskModel, User as UserModel, CreateTask, CreateUser
-
-from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException, WebSocket, WebSocketDisconnect, Query
+from typing import List
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-app = FastAPI()
+from fastapi import APIRouter, Query, Depends, HTTPException, BackgroundTasks
+from app.database.init_db import get_session
+from app.routes.websocket import send_notification
+from app.database.schemas import Task as TaskDB, User as UserDB
+from app.database.models import Task as TaskModel, User as UserModel, CreateTask, CreateUser
 
-notifications: Dict[int, List[str]] = {}
-active_connections: Dict[int, List[WebSocket]] = {}
+router = APIRouter()
 
-async def notify_user(user_id: int, message: str):
-    notifications.setdefault(user_id, []).append(message)
-    conns = active_connections.get(user_id, []) + active_connections.get(0, [])
-    disconnected = []
-    for ws in conns:
-        try:
-            await ws.send_text(message)
-        except Exception:
-            disconnected.append(ws)
-    for ws in disconnected:
-        conns.remove(ws)
-
-async def send_notification(msg: str, user_id: int):
-    await notify_user(user_id, msg)
-
-@app.websocket("/ws/notifications")
-async def global_websocket(websocket: WebSocket):
-    await websocket.accept()
-    active_connections.setdefault(0, []).append(websocket)
-    try:
-        while True:
-            await asyncio.sleep(60)
-    except WebSocketDisconnect:
-        active_connections[0].remove(websocket)
-
-
-@app.get("/tasks", response_model=List[TaskModel])
+@router.get("/tasks", response_model=List[TaskModel])
 async def get_tasks(
     user_id: int | None = Query(default=None),
     session: AsyncSession = Depends(get_session)
@@ -49,7 +22,7 @@ async def get_tasks(
     result = await session.execute(query)
     return result.scalars().all()
 
-@app.get("/tasks/{task_id}", response_model=TaskModel)
+@router.get("/tasks/{task_id}", response_model=TaskModel)
 async def get_task(
     task_id: int,
     session: AsyncSession = Depends(get_session)
@@ -60,7 +33,7 @@ async def get_task(
         raise HTTPException(status_code=404, detail="User not found")
     return task
 
-@app.post("/tasks", response_model=TaskModel)
+@router.post("/tasks", response_model=TaskModel)
 async def create_task(
     task: CreateTask,
     background_tasks: BackgroundTasks,
@@ -77,7 +50,7 @@ async def create_task(
     background_tasks.add_task(send_notification, user_id=db_task.user_id, msg=f"New Task was created with id: {db_task.id}")
     return db_task
 
-@app.put("/tasks/{task_id}")
+@router.put("/tasks/{task_id}")
 async def update_task(
     task_id: int,
     task: CreateTask,
@@ -95,7 +68,7 @@ async def update_task(
     background_tasks.add_task(send_notification, user_id=db_task.user_id, msg=f"Task was updated with id: {db_task.id}")
     return {"message": "Updated"}
 
-@app.delete("/tasks/{task_id}")
+@router.delete("/tasks/{task_id}")
 async def delete_task(
     task_id: int,
     background_tasks: BackgroundTasks,
@@ -110,23 +83,27 @@ async def delete_task(
     background_tasks.add_task(send_notification, user_id=db_task.user_id, msg=f"Task was deleted with id: {task_id}")
     return {"message": "Deleted"}
 
-@app.get("/users", response_model=List[UserModel])
+@router.get("/users", response_model=List[UserModel])
 async def get_users(session: AsyncSession = Depends(get_session)):
-    result = await session.execute(select(UserDB))
+    result = await session.execute(select(UserDB).options(selectinload(UserDB.tasks)))
     return result.scalars().all()
 
-@app.get("/users/{user_id}", response_model=UserModel)
+@router.get("/users/{user_id}", response_model=UserModel)
 async def get_user(
     user_id: int,
     session: AsyncSession = Depends(get_session)
     ):
-    result = await session.execute(select(UserDB).where(UserDB.id == user_id))
+    result = await session.execute(
+        select(UserDB)
+        .options(selectinload(UserDB.tasks))
+        .where(UserDB.id == user_id)
+    )
     user = result.scalar_one_or_none()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@app.post("/users", response_model=UserModel)
+@router.post("/users", response_model=UserModel)
 async def create_user(
     user: CreateUser,
     background_tasks: BackgroundTasks,
@@ -139,7 +116,7 @@ async def create_user(
     background_tasks.add_task(send_notification,user_id=db_user.id, msg=f"New User was added with id: {db_user.id}")
     return db_user
 
-@app.delete("/users/{user_id}")
+@router.delete("/users/{user_id}")
 async def delete_user(
     user_id: int,
     background_tasks: BackgroundTasks,
